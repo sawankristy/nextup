@@ -8,8 +8,10 @@ Capstone project for the Web Development course (USJ, semester 7), by **Kristy S
 
 | | |
 | --- | --- |
-| Live app | _coming in Milestone 4_ |
-| Live API | _coming in Milestone 4_ |
+| Live app | https://nextup-kl.netlify.app |
+| Live API | https://nextup-api-23mj.onrender.com/api/health |
+
+The API runs on Render's free plan: after 15 minutes without visitors it goes to sleep, so the first request can take up to a minute.
 
 ## Features
 
