@@ -1,12 +1,12 @@
 import express from 'express';
 import { Item } from '../models/Item.js';
-import { validateId, validateItemUpdate } from '../middleware/validate.js';
+import { validateId, validate, ItemUpdateInput } from '../middleware/validate.js';
 
 // every route here runs after requireAuth, so req.userId is always set
 const itemsRouter = express.Router();
 
 // UPDATE --> PATCH /api/items/:id  (status and/or rating)
-itemsRouter.patch('/:id', validateId, validateItemUpdate, async (req, res) => {
+itemsRouter.patch('/:id', validateId, validate(ItemUpdateInput), async (req, res) => {
   const { status, rating } = req.body;
   // only the fields that were sent, so changing the rating doesn't erase the status
   const changes = {};

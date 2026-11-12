@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import { User } from '../models/User.js';
 import { signToken } from '../auth/token.js';
-import { validateSignup, validateLogin } from '../middleware/validate.js';
+import { validate, SignupInput, LoginInput } from '../middleware/validate.js';
 
 const authRouter = express.Router();
 
@@ -12,10 +12,9 @@ function publicUser(user) {
 }
 
 // SIGN UP --> POST /api/auth/signup  (validate --> hash --> save --> sign)
-authRouter.post('/signup', validateSignup, async (req, res) => {
-  const name = req.body.name.trim();
-  const email = req.body.email.trim().toLowerCase();
-  const { password } = req.body;
+authRouter.post('/signup', validate(SignupInput), async (req, res) => {
+  const { name, password } = req.body; // zod already trimmed the name
+  const email = req.body.email.toLowerCase();
   try {
     if (await User.findOne({ email })) {
       return res.status(409).json({ error: 'Email already registered' });
@@ -29,8 +28,8 @@ authRouter.post('/signup', validateSignup, async (req, res) => {
 });
 
 // LOG IN --> POST /api/auth/login  (find --> compare --> sign)
-authRouter.post('/login', validateLogin, async (req, res) => {
-  const email = req.body.email.trim().toLowerCase();
+authRouter.post('/login', validate(LoginInput), async (req, res) => {
+  const email = req.body.email.toLowerCase();
   const { password } = req.body;
   try {
     const user = await User.findOne({ email });

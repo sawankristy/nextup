@@ -1,7 +1,7 @@
 import express from 'express';
 import { List } from '../models/List.js';
 import { Item } from '../models/Item.js';
-import { validateId, validateNewList, validateRename, validateNewItem } from '../middleware/validate.js';
+import { validateId, validate, NewListInput, RenameInput, NewItemInput } from '../middleware/validate.js';
 
 // every route here runs after requireAuth, so req.userId is always set
 const listsRouter = express.Router();
@@ -21,11 +21,11 @@ listsRouter.get('/', async (req, res) => {
 });
 
 // CREATE --> POST /api/lists
-listsRouter.post('/', validateNewList, async (req, res) => {
+listsRouter.post('/', validate(NewListInput), async (req, res) => {
   try {
     const list = await List.create({
       userId: req.userId, // the owner comes from the token, never from the body
-      name: req.body.name.trim(),
+      name: req.body.name, // already trimmed by zod
       category: req.body.category,
     });
     res.status(201).json({ ...list.toObject(), count: 0 });
@@ -47,11 +47,11 @@ listsRouter.get('/:id', validateId, async (req, res) => {
 });
 
 // RENAME --> PATCH /api/lists/:id  (only the name, the category stays the same)
-listsRouter.patch('/:id', validateId, validateRename, async (req, res) => {
+listsRouter.patch('/:id', validateId, validate(RenameInput), async (req, res) => {
   try {
     const list = await List.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      { name: req.body.name.trim() },
+      { name: req.body.name },
       // returnDocument: 'after' = new: true from the course (Mongoose 9 renamed it)
       { returnDocument: 'after', runValidators: true }
     );
@@ -87,7 +87,7 @@ listsRouter.get('/:id/items', validateId, async (req, res) => {
 });
 
 // ADD A TITLE --> POST /api/lists/:id/items  (from the search results)
-listsRouter.post('/:id/items', validateId, validateNewItem, async (req, res) => {
+listsRouter.post('/:id/items', validateId, validate(NewItemInput), async (req, res) => {
   const { externalId, title, author, year, imageUrl } = req.body;
   try {
     const list = await List.findOne({ _id: req.params.id, userId: req.userId });
