@@ -63,6 +63,12 @@ Capstone project for the Web Development course (USJ, semester 7), by **Kristy S
 | `/lists/:id` | One list, with its titles | logged-in users (owner only) |
 | `/lists/:id/add` | Search and add titles | logged-in users (owner only) |
 
+### Wireframes
+
+The 6 screens and how users move between them (low-fi):
+
+![Wireframes of the 6 screens](docs/wireframes.png)
+
 ### Database schema
 
 A user has many lists, and a list has many items. The list's category decides which API the search uses.
