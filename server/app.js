@@ -6,6 +6,7 @@ import authRouter from './routes/auth.js';
 import listsRouter from './routes/lists.js';
 import itemsRouter from './routes/items.js';
 import searchRouter from './routes/search.js';
+import suggestionsRouter from './routes/suggestions.js';
 import { requireAuth } from './middleware/requireAuth.js';
 
 // the app is in its own file (no connect, no listen here)
@@ -42,6 +43,7 @@ app.use('/api/auth', authRouter);                  // public: you can't have a t
 app.use('/api/lists', requireAuth, listsRouter);   // locked
 app.use('/api/items', requireAuth, itemsRouter);   // locked
 app.use('/api/search', requireAuth, searchRouter); // locked too, so only our users spend our TMDB key
+app.use('/api/suggestions', requireAuth, suggestionsRouter); // locked, same reason
 
 // if no route above matched, answer 404
 app.use((req, res) => {

@@ -5,6 +5,18 @@ const searchRouter = express.Router();
 const TMDB_URL = 'https://api.themoviedb.org/3/search/movie';
 const POSTER_URL = 'https://image.tmdb.org/t/p/w200';
 
+// one TMDB movie --> what the app needs (the search and the suggestions both use this)
+// i only send back what the app needs, in the same shape as the book results
+export function toMovie(movie) {
+  return {
+    externalId: String(movie.id),
+    title: movie.title,
+    author: '',
+    year: movie.release_date ? Number(movie.release_date.slice(0, 4)) : null,
+    imageUrl: movie.poster_path ? POSTER_URL + movie.poster_path : '',
+  };
+}
+
 // GET /api/search/movies?q=alien
 // the browser asks OUR server, and our server asks TMDB with the key from .env
 // --> the key never reaches the browser
@@ -20,15 +32,7 @@ searchRouter.get('/movies', async (req, res) => {
     const response = await fetch(`${TMDB_URL}?${params}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    // i only send back what the app needs, in the same shape as the book results
-    const movies = data.results.map(movie => ({
-      externalId: String(movie.id),
-      title: movie.title,
-      author: '',
-      year: movie.release_date ? Number(movie.release_date.slice(0, 4)) : null,
-      imageUrl: movie.poster_path ? POSTER_URL + movie.poster_path : '',
-    }));
-    res.json(movies);
+    res.json(data.results.map(toMovie));
   } catch {
     res.status(500).json({ error: 'Movie search failed, try again in a minute' });
   }

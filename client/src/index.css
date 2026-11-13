@@ -232,6 +232,24 @@ select {
   box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
+/* a small select ("Add to:" of the suggestions, "Year" of the search filters) */
+.field select {
+  height: 40px;
+  min-width: 0;
+  padding: 0 var(--sp-2);
+  border: 1.5px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+}
+
+/* label and select on the same line */
+.field-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
 .field-error {
   margin: 0;
   color: var(--danger);
@@ -765,6 +783,77 @@ select {
   white-space: nowrap;
 }
 
+/* ---------- suggestions (My Lists) ---------- */
+.suggestions {
+  margin-top: var(--sp-6);
+}
+
+.suggestions h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* the Books · Movies pills, and "Add to:" next to them (under them on a small phone) */
+.suggestions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+  margin: var(--sp-3) 0;
+}
+
+.suggestions-bar .filters {
+  margin-top: 0;
+}
+
+/* same colors as the Books / Movies badges */
+.pill-book[aria-pressed="true"] { background: var(--book-bg); color: var(--book-text); }
+.pill-movie[aria-pressed="true"] { background: var(--movie-bg); color: var(--movie-text); }
+
+.suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 columns on a phone */
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* same look as a list card */
+.suggestion-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.suggestion-cover {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3; /* the shape of a book cover or a poster */
+  margin-bottom: var(--sp-1);
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--border);
+}
+
+.suggestion-card .item-title {
+  font-size: 0.9375rem;
+}
+
+/* the button (or "✓ Added") sits at the bottom, so the buttons of a row line up */
+.suggestion-card .button,
+.suggestion-card .added {
+  margin-top: auto;
+  justify-content: center;
+  text-align: center;
+  white-space: normal; /* "✓ Already in this list" can take 2 lines */
+}
+
 /* ---------- skeleton loading ---------- */
 /* grey blocks with a soft light moving across them (the "shimmer") */
 .skeleton {
@@ -846,6 +935,10 @@ select {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .suggestion-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .add-button {
     width: auto;
   }
@@ -855,6 +948,10 @@ select {
 @media (min-width: 1024px) {
   .list-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .suggestion-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .item-list,

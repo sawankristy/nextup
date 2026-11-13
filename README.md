@@ -19,6 +19,7 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 - **Lists**: create, rename and delete your own lists. Each list has a category: **Books** or **Movies**.
 - **Search**: a Books list searches [Open Library](https://openlibrary.org) by title or author, and a Movies list searches [TMDB](https://www.themoviedb.org) by title.
 - **Add titles** from the search results in one click. Titles already in the list show "✓ Added".
+- **Suggestions**: under your lists, My Lists suggests this week's trending books (Open Library) and popular movies (TMDB), in two tabs: Books · Movies. Choose one of your lists in "Add to:", then add a title with "+ Add". Its list card updates right away.
 - **Track each title**: change its status (to read / reading / done, or to watch / watching / done), rate it from 1 to 5 stars, or remove it.
 - **Filter by status**: pills above the titles (All · To read · Reading · Done, or All · To watch · Watching · Done) show how many titles each status has. Click one to see only those titles.
 - **Fast pages**: when you go back to a page you already opened, its data shows at once from a small cache, and the app refreshes it in the background. The first time a page loads, grey skeleton blocks show where the content will appear.
@@ -55,7 +56,7 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 - The **client** and the **server** are two separate programs in one repository, each with its own `package.json` and `.env`.
 - Every request to our API goes through one function, `apiFetch` (`client/src/api/client.js`). It adds the API's base URL and the login token, and turns error answers into JavaScript errors.
 - Pages load their data with the `useApi` hook (`client/src/hooks/useApi.js`). It keeps a small cache in memory (path → data): a page you already visited shows its data at once, then refreshes it in the background. Logging out clears the cache, so the next user never sees the previous user's lists.
-- On the server, `requireAuth` checks the token on every `/api/lists`, `/api/items` and `/api/search` request and sets `req.userId`. Every database query then filters by `userId`, so a user can never read or change someone else's data (it answers 404, as if the data didn't exist).
+- On the server, `requireAuth` checks the token on every `/api/lists`, `/api/items`, `/api/search` and `/api/suggestions` request and sets `req.userId`. Every database query then filters by `userId`, so a user can never read or change someone else's data (it answers 404, as if the data didn't exist).
 - The movie search goes **through our API**, so the TMDB key stays in `server/.env` and never reaches the browser. Open Library needs no key, so the browser asks it directly.
 
 ### Pages
@@ -133,6 +134,8 @@ All routes except `/api/auth/*` and `/api/health` need the header `Authorization
 | PATCH | `/api/items/:id` | change `{ status }` and/or `{ rating }` | 200 | 400, 401, 404 |
 | DELETE | `/api/items/:id` | remove a title | 204 | 400, 401, 404 |
 | GET | `/api/search/movies?q=` | search TMDB (through our server) | 200 | 400, 401, 500 |
+| GET | `/api/suggestions/books` | this week's trending books (Open Library), kept 1 hour on the server | 200 | 401, 500 |
+| GET | `/api/suggestions/movies` | popular movies (TMDB, through our server), kept 1 hour on the server | 200 | 401, 500 |
 | GET | `/api/health` | check that the server is running | 200 | |
 
 ### Project structure
@@ -162,7 +165,7 @@ nextup/
     ├── server.js              checks the env variables, connects to MongoDB, then starts the server
     ├── vitest.config.js       a fake JWT secret, only for the tests
     ├── models/                User, List, Item (Mongoose schemas + indexes)
-    ├── routes/                auth, lists, items, search
+    ├── routes/                auth, lists, items, search, suggestions
     ├── middleware/            requireAuth (checks the token), validate (zod schemas)
     ├── auth/token.js          signs and verifies the JWT
     └── tests/api.test.js      back-end tests (Vitest + supertest)

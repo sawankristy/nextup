@@ -6,6 +6,7 @@ import AppLayout from '../components/AppLayout.jsx';
 import ListCard from '../components/ListCard.jsx';
 import NewListForm from '../components/NewListForm.jsx';
 import Skeleton from '../components/Skeleton.jsx';
+import Suggestions from '../components/Suggestions.jsx';
 import { plural } from '../format.js';
 
 export default function MyListsPage() {
@@ -46,6 +47,9 @@ export default function MyListsPage() {
           {lists.map(list => <ListCard key={list._id} list={list} />)}
         </div>
       )}
+
+      {/* only once my lists are here: the "Add to:" select needs them */}
+      {lists && <Suggestions lists={lists} setLists={setLists} />}
     </AppLayout>
   );
 }

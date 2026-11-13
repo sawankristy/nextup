@@ -21,6 +21,12 @@ describe('NextUp API', () => {
     expect(res.body).toEqual({ error: 'Missing token' });
   });
 
+  it('locks the suggestions behind a token', async () => {
+    const res = await request(app).get('/api/suggestions/movies');
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: 'Missing token' });
+  });
+
   it('rejects a short password at signup', async () => {
     const res = await request(app)
       .post('/api/auth/signup')
