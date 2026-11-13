@@ -444,26 +444,15 @@ select {
 
 .badge-book { background: var(--book-bg); color: var(--book-text); }
 .badge-movie { background: var(--movie-bg); color: var(--movie-text); }
-.text-book { color: var(--book-text); }
-.text-movie { color: var(--movie-text); }
 
-.empty,
-.hint {
+.empty {
+  margin: var(--sp-4) 0 0;
   padding: var(--sp-3);
   border: 1px dashed var(--input-border);
   border-radius: 14px;
   background: var(--card);
   color: var(--muted);
-}
-
-.empty {
-  margin: var(--sp-4) 0 0;
   text-align: center;
-}
-
-.hint {
-  margin: var(--sp-5) 0 0;
-  font-size: 0.875rem;
 }
 
 /* My Lists */
@@ -622,6 +611,49 @@ select {
 .status-to-do { background: var(--todo-bg); color: var(--todo-text); }
 .status-in-progress { background: var(--progress-bg); color: var(--progress-text); }
 .status-done { background: var(--done-bg); color: var(--done-text); }
+
+/* filter pills above the titles */
+.filters {
+  display: flex;
+  flex-wrap: wrap; /* on a small phone they go on 2 lines */
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 40px;
+  padding: 0 var(--sp-3);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms ease-out, color 180ms ease-out, border-color 180ms ease-out;
+}
+
+.pill:hover {
+  border-color: var(--input-border);
+  color: var(--text);
+}
+
+.pill-count {
+  font-weight: 500;
+}
+
+/* the pill that is on takes the colors of its status, with a border in its text color */
+.pill[aria-pressed="true"] {
+  border-color: currentColor;
+}
+
+.pill-all[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #FFFFFF; }
+.pill-to-do[aria-pressed="true"] { background: var(--todo-bg); color: var(--todo-text); }
+.pill-in-progress[aria-pressed="true"] { background: var(--progress-bg); color: var(--progress-text); }
+.pill-done[aria-pressed="true"] { background: var(--done-bg); color: var(--done-text); }
 
 .stars {
   display: flex;

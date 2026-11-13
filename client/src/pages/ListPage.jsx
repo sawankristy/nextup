@@ -7,6 +7,8 @@ import BackLink from '../components/BackLink.jsx';
 import CategoryBadge from '../components/CategoryBadge.jsx';
 import ItemCard from '../components/ItemCard.jsx';
 import RenameForm from '../components/RenameForm.jsx';
+import Skeleton from '../components/Skeleton.jsx';
+import StatusFilter from '../components/StatusFilter.jsx';
 import { plural } from '../format.js';
 
 export default function ListPage() {
@@ -16,6 +18,7 @@ export default function ListPage() {
   const { data: items, setData: setItems, error: itemsError, reload: reloadItems } = useApi(`/api/lists/${id}/items`);
   const [renaming, setRenaming] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [filter, setFilter] = useState('all'); // which pill is on: 'all', 'to do', 'in progress' or 'done'
 
   // change it on screen right away (map + spread), then save it on the server
   async function updateItem(itemId, changes) {
@@ -70,10 +73,17 @@ export default function ListPage() {
     );
   }
   if (!list || !items) {
-    return <AppLayout><p className="muted">Loading…</p></AppLayout>;
+    return (
+      <AppLayout>
+        <BackLink to="/lists">My Lists</BackLink>
+        <Skeleton title count={3} />
+      </AppLayout>
+    );
   }
 
   const done = items.filter(item => item.status === 'done').length; // computed, not state
+  // the titles to show are computed from items + filter, never stored (one source of truth)
+  const shown = filter === 'all' ? items : items.filter(item => item.status === filter);
 
   return (
     <AppLayout>
@@ -102,17 +112,24 @@ export default function ListPage() {
       {items.length === 0 ? (
         <p className="empty">Nothing here yet. Add your first {list.category}!</p>
       ) : (
-        <ul className="item-list">
-          {items.map(item => (
-            <ItemCard
-              key={item._id}
-              item={item}
-              category={list.category}
-              onChange={updateItem}
-              onRemove={removeItem}
-            />
-          ))}
-        </ul>
+        <>
+          <StatusFilter category={list.category} items={items} selected={filter} onSelect={setFilter} />
+          {shown.length === 0 ? (
+            <p className="empty">No titles here yet.</p>
+          ) : (
+            <ul className="item-list">
+              {shown.map(item => (
+                <ItemCard
+                  key={item._id}
+                  item={item}
+                  category={list.category}
+                  onChange={updateItem}
+                  onRemove={removeItem}
+                />
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </AppLayout>
   );

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { apiFetch } from '../api/client.js';
+import { clearApiCache } from '../hooks/useApi.js';
 
 const AuthContext = createContext(null);
 
@@ -41,6 +42,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('name');
+    clearApiCache(); // the next user must not see my lists
     setToken(null);
     setName(null);
   }, []);

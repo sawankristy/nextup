@@ -5,10 +5,11 @@ import { useApi } from '../hooks/useApi.js';
 import AppLayout from '../components/AppLayout.jsx';
 import ListCard from '../components/ListCard.jsx';
 import NewListForm from '../components/NewListForm.jsx';
+import Skeleton from '../components/Skeleton.jsx';
 import { plural } from '../format.js';
 
 export default function MyListsPage() {
-  const { data: lists, error } = useApi('/api/lists');
+  const { data: lists, setData: setLists, error } = useApi('/api/lists');
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
 
@@ -17,6 +18,7 @@ export default function MyListsPage() {
       method: 'POST',
       body: JSON.stringify(newList),
     });
+    if (lists) setLists(prev => [list, ...prev]); // the cache knows the new list, so My Lists is right when i come back
     navigate(`/lists/${list._id}`); // go straight into the new list
   }
 
@@ -35,7 +37,7 @@ export default function MyListsPage() {
       {showForm && <NewListForm onCreate={createList} onCancel={() => setShowForm(false)} />}
 
       {error && <p className="error" role="alert">{error.message}</p>}
-      {!lists && !error && <p className="muted">Loading…</p>}
+      {!lists && !error && <Skeleton type="cards" count={4} />}
       {lists?.length === 0 && (
         <p className="empty">No lists yet. Create your first one with “+ New list”.</p>
       )}
@@ -44,11 +46,6 @@ export default function MyListsPage() {
           {lists.map(list => <ListCard key={list._id} list={list} />)}
         </div>
       )}
-
-      <p className="hint">
-        Each list has a category. A <b className="text-book">Books</b> list searches Open Library,
-        a <b className="text-movie">Movies</b> list searches TMDB.
-      </p>
     </AppLayout>
   );
 }

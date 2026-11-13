@@ -8,6 +8,7 @@ import BackLink from '../components/BackLink.jsx';
 import CategoryBadge from '../components/CategoryBadge.jsx';
 import SearchBar from '../components/SearchBar.jsx';
 import SearchResult from '../components/SearchResult.jsx';
+import Skeleton from '../components/Skeleton.jsx';
 
 export default function SearchPage() {
   const { id } = useParams();
@@ -66,7 +67,7 @@ export default function SearchPage() {
     );
   }
   if (!list || !items) {
-    return <AppLayout><p className="muted">Loading…</p></AppLayout>;
+    return <AppLayout><Skeleton title type="rows" count={3} /></AppLayout>;
   }
 
   const isBooks = list.category === 'book';
@@ -88,7 +89,7 @@ export default function SearchPage() {
       />
       <p className="muted small source">Results from {isBooks ? 'Open Library' : 'TMDB'}</p>
 
-      {status === 'loading' && <p className="muted">Searching…</p>}
+      {status === 'loading' && <Skeleton type="rows" count={3} />}
       {status === 'error' && (
         <p className="error" role="alert">Couldn't search right now. Try again in a minute.</p>
       )}

@@ -1,11 +1,6 @@
 import Cover from './Cover.jsx';
 import StarRating from './StarRating.jsx';
-
-// the database keeps 'to do' / 'in progress' / 'done', the screen shows words that fit the category
-const STATUS_LABELS = {
-  book: { 'to do': 'To read', 'in progress': 'Reading', done: 'Done' },
-  movie: { 'to do': 'To watch', 'in progress': 'Watching', done: 'Done' },
-};
+import { STATUS_LABELS } from '../labels.js';
 
 // one title in a list. it doesn't change anything itself: it calls the parent (data down, events up)
 export default function ItemCard({ item, category, onChange, onRemove }) {
