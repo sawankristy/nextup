@@ -6,9 +6,18 @@ import { useApi } from '../hooks/useApi.js';
 import AppLayout from '../components/AppLayout.jsx';
 import BackLink from '../components/BackLink.jsx';
 import CategoryBadge from '../components/CategoryBadge.jsx';
+import ResultFilters from '../components/ResultFilters.jsx';
 import SearchBar from '../components/SearchBar.jsx';
 import SearchResult from '../components/SearchResult.jsx';
 import Skeleton from '../components/Skeleton.jsx';
+import { YEAR_RANGES } from '../labels.js';
+
+// is this result in the chosen year range? a title with no year only shows with "Any year"
+function matchesYear(result, year) {
+  if (year === 'any') return true;
+  const range = YEAR_RANGES.find(r => r.value === year);
+  return Boolean(result.year) && result.year >= range.from && result.year <= range.to;
+}
 
 export default function SearchPage() {
   const { id } = useParams();
@@ -18,6 +27,11 @@ export default function SearchPage() {
   const [results, setResults] = useState([]);
   const [status, setStatus] = useState('idle'); // idle / loading / error / ready
   const [addError, setAddError] = useState('');
+  // the 3 filters: here and not in ResultFilters, because the results are filtered here
+  // a new search doesn't touch them, so they stay
+  const [year, setYear] = useState('any');
+  const [coverOnly, setCoverOnly] = useState(false);
+  const [hideAdded, setHideAdded] = useState(false);
 
   const category = list?.category;
 
@@ -57,6 +71,12 @@ export default function SearchPage() {
     }
   }
 
+  function clearFilters() {
+    setYear('any');
+    setCoverOnly(false);
+    setHideAdded(false);
+  }
+
   const error = listError || itemsError;
   if (error) {
     return (
@@ -72,6 +92,13 @@ export default function SearchPage() {
 
   const isBooks = list.category === 'book';
   const addedIds = items.map(item => item.externalId);
+  // the filters never change `results`: the shown ones are computed again on every render (never stored)
+  const shown = results.filter(result =>
+    matchesYear(result, year) &&
+    (!coverOnly || result.imageUrl) &&
+    (!hideAdded || !addedIds.includes(result.externalId))
+  );
+  const hasResults = status === 'ready' && results.length > 0;
 
   return (
     <AppLayout>
@@ -88,6 +115,16 @@ export default function SearchPage() {
         disabled={status === 'loading'}
       />
       <p className="muted small source">Results from {isBooks ? 'Open Library' : 'TMDB'}</p>
+      {hasResults && (
+        <ResultFilters
+          year={year}
+          setYear={setYear}
+          coverOnly={coverOnly}
+          setCoverOnly={setCoverOnly}
+          hideAdded={hideAdded}
+          setHideAdded={setHideAdded}
+        />
+      )}
 
       {status === 'loading' && <Skeleton type="rows" count={3} />}
       {status === 'error' && (
@@ -98,9 +135,19 @@ export default function SearchPage() {
       )}
       {addError && <p className="error" role="alert">{addError}</p>}
 
-      {status === 'ready' && results.length > 0 && (
+      {hasResults && shown.length > 0 && shown.length < results.length && (
+        <p className="muted small result-count">Showing {shown.length} of {results.length}</p>
+      )}
+      {hasResults && shown.length === 0 && (
+        <p className="empty">
+          No results match these filters.{' '}
+          <button type="button" className="link-button" onClick={clearFilters}>Clear filters</button>
+        </p>
+      )}
+
+      {hasResults && shown.length > 0 && (
         <ul className="result-list">
-          {results.map(result => (
+          {shown.map(result => (
             <SearchResult
               key={result.externalId}
               result={result}

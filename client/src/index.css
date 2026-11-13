@@ -274,7 +274,8 @@ select {
   gap: var(--sp-4);
 }
 
-.radio {
+.radio,
+.checkbox {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
@@ -283,7 +284,8 @@ select {
   cursor: pointer;
 }
 
-.radio input {
+.radio input,
+.checkbox input {
   width: 18px;
   height: 18px;
   accent-color: var(--brand);
@@ -852,6 +854,30 @@ select {
   justify-content: center;
   text-align: center;
   white-space: normal; /* "✓ Already in this list" can take 2 lines */
+}
+
+/* ---------- filters on the search results ---------- */
+/* Year + the 2 checkboxes on one row, on 2 or 3 rows on a phone */
+.result-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--sp-4);
+  margin-top: var(--sp-3);
+  font-size: 0.875rem;
+}
+
+.result-filters .checkbox {
+  font-weight: 600;
+}
+
+.result-count {
+  margin-top: var(--sp-3);
+}
+
+/* "Showing 8 of 20" is just above the results */
+.result-count + .result-list {
+  margin-top: var(--sp-2);
 }
 
 /* ---------- skeleton loading ---------- */

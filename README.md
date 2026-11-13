@@ -19,6 +19,7 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 - **Lists**: create, rename and delete your own lists. Each list has a category: **Books** or **Movies**.
 - **Search**: a Books list searches [Open Library](https://openlibrary.org) by title or author, and a Movies list searches [TMDB](https://www.themoviedb.org) by title.
 - **Add titles** from the search results in one click. Titles already in the list show "✓ Added".
+- **Filter the search results**: by year (before 1980, 1980–1999, 2000–2014, 2015 and after), only titles with a cover, or hide the titles already in the list. "Showing 8 of 20" says when a filter hides something, and the filters stay when you search again.
 - **Suggestions**: under your lists, My Lists suggests this week's trending books (Open Library) and popular movies (TMDB), in two tabs: Books · Movies. Choose one of your lists in "Add to:", then add a title with "+ Add". Its list card updates right away.
 - **Track each title**: change its status (to read / reading / done, or to watch / watching / done), rate it from 1 to 5 stars, or remove it.
 - **Filter by status**: pills above the titles (All · To read · Reading · Done, or All · To watch · Watching · Done) show how many titles each status has. Click one to see only those titles.
