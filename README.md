@@ -20,6 +20,8 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 - **Search**: a Books list searches [Open Library](https://openlibrary.org) by title or author, and a Movies list searches [TMDB](https://www.themoviedb.org) by title.
 - **Add titles** from the search results in one click. Titles already in the list show "✓ Added".
 - **Track each title**: change its status (to read / reading / done, or to watch / watching / done), rate it from 1 to 5 stars, or remove it.
+- **Filter by status**: pills above the titles (All · To read · Reading · Done, or All · To watch · Watching · Done) show how many titles each status has. Click one to see only those titles.
+- **Fast pages**: when you go back to a page you already opened, its data shows at once from a small cache, and the app refreshes it in the background. The first time a page loads, grey skeleton blocks show where the content will appear.
 - **Private**: the My Lists page and the list pages are only for logged-in users, and each user only ever sees their own lists.
 - **Responsive**: built mobile-first, so it works on a phone and on a desktop.
 
@@ -32,15 +34,16 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 | Database | MongoDB (MongoDB Atlas) with Mongoose |
 | Authentication | bcrypt for hashing passwords, JSON Web Tokens (JWT) sent as `Authorization: Bearer <token>` |
 | Third-party APIs | Open Library (books, no key needed), TMDB (movies, the key stays on the server) |
-| Tests | Vitest and React Testing Library (front end), Node's built-in test runner (back end) |
+| Security | helmet (secure headers), express-rate-limit (rate limits), zod (input validation) |
+| Tests | Vitest everywhere: React Testing Library and user-event (front end), supertest (back end) |
 
 ## Architecture
 
 ```
  Browser: React app (client/)                 Express API (server/)                    MongoDB Atlas
  ┌──────────────────────────┐   fetch + JWT   ┌───────────────────────────┐  Mongoose  ┌──────────────┐
- │ pages ─ components       │ ──────────────▶ │ cors ─ express.json       │ ─────────▶ │ users        │
- │ AuthContext (token)      │                 │ requireAuth (checks JWT)  │            │ lists        │
+ │ pages ─ components       │ ──────────────▶ │ helmet ─ cors ─ limits    │ ─────────▶ │ users        │
+ │ AuthContext (token)      │                 │ requireAuth ─ zod         │            │ lists        │
  │ apiFetch ─ useApi        │ ◀────────────── │ routes: auth, lists,      │ ◀───────── │ items        │
  └──────────┬───────────────┘      JSON       │ items, search             │            └──────────────┘
             │                                 └────────────┬──────────────┘
@@ -51,6 +54,7 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 
 - The **client** and the **server** are two separate programs in one repository, each with its own `package.json` and `.env`.
 - Every request to our API goes through one function, `apiFetch` (`client/src/api/client.js`). It adds the API's base URL and the login token, and turns error answers into JavaScript errors.
+- Pages load their data with the `useApi` hook (`client/src/hooks/useApi.js`). It keeps a small cache in memory (path → data): a page you already visited shows its data at once, then refreshes it in the background. Logging out clears the cache, so the next user never sees the previous user's lists.
 - On the server, `requireAuth` checks the token on every `/api/lists`, `/api/items` and `/api/search` request and sets `req.userId`. Every database query then filters by `userId`, so a user can never read or change someone else's data (it answers 404, as if the data didn't exist).
 - The movie search goes **through our API**, so the TMDB key stays in `server/.env` and never reaches the browser. Open Library needs no key, so the browser asks it directly.
 
@@ -135,27 +139,33 @@ All routes except `/api/auth/*` and `/api/health` need the header `Authorization
 
 ```
 nextup/
+├── SECURITY.md                security audit: 7 attacks, before and after the fixes
+├── PERFORMANCE.md             Lighthouse scores and bundle sizes, before and after
+├── docs/                      wireframes
 ├── client/                    React app (Vite), runs on http://localhost:5173
 │   ├── .env.example           what goes in .env.development
 │   └── src/
 │       ├── main.jsx           mounts the app with the router and the auth provider
-│       ├── App.jsx            the routes (which URL shows which page)
+│       ├── App.jsx            the routes (which URL shows which page), logged-in pages loaded lazily
 │       ├── index.css          all the styles (design tokens, mobile-first)
 │       ├── format.js          small text helpers
+│       ├── labels.js          the status words of each category (To read, To watch, …)
+│       ├── setupTests.js      adds toBeInTheDocument() and friends to the tests
 │       ├── api/               client.js (apiFetch), search.js (Open Library + movies)
-│       ├── hooks/useApi.js    loads data from the API (data, error, loading, reload)
+│       ├── hooks/useApi.js    loads data from the API, with a small cache (data, error, loading, reload)
 │       ├── auth/              AuthContext (token, login, signup, logout), RequireAuth
 │       ├── pages/             Home, Login, Signup, MyLists, List, Search
-│       └── components/        Header, ListCard, ItemCard, StarRating, SearchBar, …
+│       └── components/        Header, ListCard, ItemCard, StatusFilter, Skeleton, StarRating, …
 └── server/                    Express API, runs on http://localhost:3000
     ├── .env.example           what goes in .env
-    ├── app.js                 middleware and routes
-    ├── server.js              connects to MongoDB, then starts the server
-    ├── models/                User, List, Item (Mongoose schemas)
+    ├── app.js                 middleware (helmet, cors, body size, rate limits) and routes
+    ├── server.js              checks the env variables, connects to MongoDB, then starts the server
+    ├── vitest.config.js       a fake JWT secret, only for the tests
+    ├── models/                User, List, Item (Mongoose schemas + indexes)
     ├── routes/                auth, lists, items, search
-    ├── middleware/            requireAuth (checks the token), validate (checks the input)
+    ├── middleware/            requireAuth (checks the token), validate (zod schemas)
     ├── auth/token.js          signs and verifies the JWT
-    └── tests/api.test.js      back-end tests
+    └── tests/api.test.js      back-end tests (Vitest + supertest)
 ```
 
 ## Run it on your computer
@@ -188,7 +198,7 @@ Start it:
 npm run dev
 ```
 
-The terminal shows `connected to MongoDB` and `API listening on http://localhost:3000`.
+The terminal shows `connected to MongoDB` and `API listening on http://localhost:3000`. If a variable is missing, the server stops right away with `Missing env var: …` and the name of the missing one.
 
 ### 2. The React app (second terminal)
 
@@ -203,27 +213,49 @@ Open http://localhost:5173 and create an account.
 
 ### 3. Tests
 
+Both sides use [Vitest](https://vitest.dev). `npm test` runs the tests once; `npm run test:watch` runs them again every time you save a file.
+
 ```
 cd server
 npm test
 ```
 
-The back-end tests start the Express app on a free port and check that `GET /api/health` answers 200, that `GET /api/lists` without a token answers 401, and that signing up with a short password answers 400. They don't need a database.
+The back-end tests (Vitest + supertest) send requests straight to the Express app, with no port and no database. They check that:
+- `GET /api/health` answers 200
+- `GET /api/lists` without a token answers 401
+- signing up with a short password answers 400
+- creating a list with an empty name answers 400, even with a valid token
+
+They don't need a `.env` file: `vitest.config.js` gives them a fake `JWT_SECRET`.
 
 ```
 cd client
 npm test
 ```
 
-The front-end tests render the `StarRating` component, check that it shows 5 stars with the right label, and check that clicking a star sends that number to the parent.
+The front-end tests (Vitest + React Testing Library + user-event) render the `StarRating` component. They check that it shows 5 stars with the right label, and that clicking a star sends that number to the parent.
 
 ## Security
 
 - Passwords are hashed with bcrypt (cost 12). The hash never leaves the server.
 - Login answers the same message ("Invalid email or password") whether the email or the password is wrong.
-- Every input is validated on the server (types, required fields, allowed values, lengths). The forms also check before sending, but the server never trusts the browser.
+- Every input is validated on the server with **zod**: one schema per request body checks the types, the required fields, the allowed values and a maximum length for every field. Keys that aren't in the schema are dropped. The forms also check before sending, but the server never trusts the browser.
+- `mongoose.set('sanitizeFilter', true)` is a backstop against NoSQL injection: a value like `{ "$ne": "" }` is treated as plain data, not as an operator.
 - The owner of a list or a title always comes from the token, never from the request body.
-- Secrets (`MONGODB_URI`, `JWT_SECRET`, `TMDB_API_KEY`) live only in `server/.env`, which is in `.gitignore`. Only `.env.example` files with placeholder values are committed.
+- **helmet** adds secure HTTP headers (Content-Security-Policy, Strict-Transport-Security, X-Content-Type-Options, …) and removes `X-Powered-By`.
+- **Rate limits** (express-rate-limit): 300 requests per 15 minutes on the whole API, and only 5 login tries per 15 minutes, then `429 Too many attempts`. Request bodies are capped at 10 KB.
+- Secrets (`MONGODB_URI`, `JWT_SECRET`, `TMDB_API_KEY`) live only in `server/.env`, which is in `.gitignore`. Only `.env.example` files with placeholder values are committed. The server refuses to start if a secret is missing.
+
+We attacked our own API and fixed what we found: see **[SECURITY.md](SECURITY.md)** (each attack, the answer before, the fix, the answer after).
+
+## Performance
+
+- The logged-in pages are loaded only when you open them (`lazy()` + `<Suspense>`), so the first download is smaller.
+- Covers and posters have a fixed `width` and `height`, so nothing jumps while they load, and `loading="lazy"`.
+- The two main database queries use indexes (`userId + createdAt` for lists, `listId + userId + createdAt` for titles).
+- Pages you already visited show at once from a small cache.
+
+Lighthouse scores, bundle sizes and what changed: see **[PERFORMANCE.md](PERFORMANCE.md)**.
 
 ## Credits
 
