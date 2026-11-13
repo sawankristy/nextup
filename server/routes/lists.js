@@ -6,7 +6,7 @@ import { validateId, validate, NewListInput, RenameInput, NewItemInput } from '.
 // every route here runs after requireAuth, so req.userId is always set
 const listsRouter = express.Router();
 
-// READ ALL --> GET /api/lists  (my lists, newest first, with how many titles each one has)
+// READ ALL --> GET /api/lists  (my lists, newest first, with how many titles each one has + the covers for the card)
 listsRouter.get('/', async (req, res) => {
   try {
     const lists = await List.find({ userId: req.userId }).sort({ createdAt: -1 });
@@ -14,7 +14,17 @@ listsRouter.get('/', async (req, res) => {
     const counts = await Promise.all(
       lists.map(list => Item.countDocuments({ listId: list._id, userId: req.userId }))
     );
-    res.json(lists.map((list, i) => ({ ...list.toObject(), count: counts[i] })));
+    // same idea for the covers: the 3 newest titles of each list, only their imageUrl
+    const newest = await Promise.all(
+      lists.map(list =>
+        Item.find({ listId: list._id, userId: req.userId }).sort({ createdAt: -1 }).limit(3).select('imageUrl')
+      )
+    );
+    res.json(lists.map((list, i) => ({
+      ...list.toObject(),
+      count: counts[i],
+      covers: newest[i].map(item => item.imageUrl).filter(Boolean), // a title without a picture is skipped
+    })));
   } catch {
     res.status(500).json({ error: 'Could not get your lists' });
   }
@@ -28,7 +38,7 @@ listsRouter.post('/', validate(NewListInput), async (req, res) => {
       name: req.body.name, // already trimmed by zod
       category: req.body.category,
     });
-    res.status(201).json({ ...list.toObject(), count: 0 });
+    res.status(201).json({ ...list.toObject(), count: 0, covers: [] });
   } catch (err) {
     res.status(400).json({ error: err.message }); // a schema rule failed (like a name that's too long)
   }

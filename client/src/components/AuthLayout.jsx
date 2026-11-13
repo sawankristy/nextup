@@ -4,7 +4,7 @@ export default function AuthLayout({ children }) {
   return (
     <div className="auth-page">
       <main className="auth-main">
-        <div className="covers covers-book covers-big" aria-hidden="true">
+        <div className="auth-covers" aria-hidden="true">
           <span></span>
           <span></span>
           <span></span>

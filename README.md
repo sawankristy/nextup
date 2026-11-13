@@ -123,7 +123,7 @@ All routes except `/api/auth/*` and `/api/health` need the header `Authorization
 | --- | --- | --- | --- | --- |
 | POST | `/api/auth/signup` | create an account, returns `{ token, user }` | 201 | 400, 409 |
 | POST | `/api/auth/login` | log in, returns `{ token, user }` | 200 | 400, 401 |
-| GET | `/api/lists` | my lists, with the number of titles in each | 200 | 401 |
+| GET | `/api/lists` | my lists, with the number of titles in each and the covers of its 3 newest titles | 200 | 401 |
 | POST | `/api/lists` | create a list `{ name, category }` | 201 | 400, 401 |
 | GET | `/api/lists/:id` | one of my lists | 200 | 400, 401, 404 |
 | PATCH | `/api/lists/:id` | rename a list `{ name }` | 200 | 400, 401, 404 |

@@ -355,39 +355,22 @@ select {
   margin: var(--sp-1) 0;
 }
 
-/* the 3 little colored "books" (just decoration) */
-.covers {
+/* the 3 little colored "books" above the logo (just decoration) */
+.auth-covers {
   display: flex;
   gap: var(--sp-2);
-  padding: var(--sp-2);
-  border-radius: 10px;
-  background: #FFF1F4;
-}
-
-.covers span {
-  width: 30px;
-  height: 42px;
-  border-radius: 4px;
-}
-
-.covers-book span:nth-child(1) { background: #E7A0B4; }
-.covers-book span:nth-child(2) { background: #9DB7E6; }
-.covers-book span:nth-child(3) { background: #F2C98B; }
-.covers-movie span:nth-child(1) { background: #3D2B33; }
-.covers-movie span:nth-child(2) { background: #8C3A4F; }
-.covers-movie span:nth-child(3) { background: #5B6B7A; }
-
-.covers-big {
   margin-bottom: var(--sp-4);
-  padding: 0;
-  background: none;
 }
 
-.covers-big span {
+.auth-covers span {
   width: 44px;
   height: 60px;
   border-radius: 6px;
 }
+
+.auth-covers span:nth-child(1) { background: #E7A0B4; }
+.auth-covers span:nth-child(2) { background: #9DB7E6; }
+.auth-covers span:nth-child(3) { background: #F2C98B; }
 
 /* ---------- logged-in pages ---------- */
 .app-header {
@@ -496,6 +479,41 @@ select {
   color: var(--text);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(194, 51, 94, 0.12);
+}
+
+/* the covers of the 3 newest titles, a bit on top of each other like a small fanned stack */
+.card-covers {
+  height: 64px; /* same height with or without covers, so all the cards line up */
+  display: flex;
+  align-items: center;
+  padding-left: var(--sp-1); /* room for the first cover's tilt */
+}
+
+.card-covers img {
+  width: 44px;
+  height: 64px;
+  border: 2px solid var(--card); /* white border */
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--border);
+  box-shadow: 0 2px 6px rgba(43, 29, 34, 0.18);
+}
+
+.card-covers img + img {
+  margin-left: -12px; /* each cover hides a bit of the one before */
+}
+
+.card-covers img:nth-child(1) { transform: rotate(-4deg); }
+.card-covers img:nth-child(3) { transform: rotate(4deg); }
+
+.card-covers-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.card-covers-icon {
+  font-size: 1.5rem;
 }
 
 .list-card-name {
@@ -772,8 +790,8 @@ select {
 }
 
 .sk-covers {
-  width: 122px; /* like the 3 little covers on a list card */
-  height: 58px;
+  width: 112px; /* like the 3 covers on a list card (44 + 2 × 32 px, + the 4 px padding) */
+  height: 64px;
 }
 
 .sk-lines {
