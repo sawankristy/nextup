@@ -8,5 +8,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true, // lets Testing Library clean the page after each test by itself
+    setupFiles: './src/setupTests.js', // adds toBeInTheDocument() and friends
   },
 })

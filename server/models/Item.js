@@ -17,5 +17,8 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// matches find({ listId, userId }).sort({ createdAt: -1 }) --> only the titles of this list, already sorted
+itemSchema.index({ listId: 1, userId: 1, createdAt: -1 });
+
 // model Item --> collection "items"
 export const Item = mongoose.model('Item', itemSchema);

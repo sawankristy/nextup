@@ -10,5 +10,8 @@ const listSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// matches find({ userId }).sort({ createdAt: -1 }) --> Mongo reads only my lists, already sorted
+listSchema.index({ userId: 1, createdAt: -1 });
+
 // model List --> collection "lists"
 export const List = mongoose.model('List', listSchema);
