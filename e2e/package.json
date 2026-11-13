@@ -1,0 +1,12 @@
+{
+  "name": "nextup-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "mongodb-memory-server": "^11.3.0"
+  }
+}

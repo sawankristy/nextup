@@ -1,3 +1,4 @@
+// integration tests: a route with its middleware, through supertest
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { describe, it, expect } from 'vitest';

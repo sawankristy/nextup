@@ -5,3 +5,5 @@ dist
 .env.production
 RECAP.md
 NEXT-STEPS.md
+e2e/test-results
+e2e/playwright-report

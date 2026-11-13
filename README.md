@@ -37,7 +37,7 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 | Authentication | bcrypt for hashing passwords, JSON Web Tokens (JWT) sent as `Authorization: Bearer <token>` |
 | Third-party APIs | Open Library (books, no key needed), TMDB (movies, the key stays on the server) |
 | Security | helmet (secure headers), express-rate-limit (rate limits), zod (input validation) |
-| Tests | Vitest everywhere: React Testing Library and user-event (front end), supertest (back end) |
+| Tests | Vitest for the unit tests (with React Testing Library and user-event) and the integration tests (with supertest), Playwright for the end-to-end tests (with an in-memory MongoDB) |
 
 ## Architecture
 
@@ -160,6 +160,10 @@ nextup/
 │       ├── auth/              AuthContext (token, login, signup, logout), RequireAuth
 │       ├── pages/             Home, Login, Signup, MyLists, List, Search
 │       └── components/        Header, ListCard, ItemCard, StatusFilter, Skeleton, StarRating, …
+├── e2e/                       end-to-end tests (Playwright), with their own package.json
+│   ├── start-api.js           starts our API on port 3001 with an in-memory MongoDB
+│   ├── playwright.config.js   Chromium only, starts the API and the built client
+│   └── nextup.spec.js         the 2 end-to-end tests
 └── server/                    Express API, runs on http://localhost:3000
     ├── .env.example           what goes in .env
     ├── app.js                 middleware (helmet, cors, body size, rate limits) and routes
@@ -169,7 +173,7 @@ nextup/
     ├── routes/                auth, lists, items, search, suggestions
     ├── middleware/            requireAuth (checks the token), validate (zod schemas)
     ├── auth/token.js          signs and verifies the JWT
-    └── tests/api.test.js      back-end tests (Vitest + supertest)
+    └── tests/api.test.js      integration tests (Vitest + supertest)
 ```
 
 ## Run it on your computer
@@ -217,27 +221,44 @@ Open http://localhost:5173 and create an account.
 
 ### 3. Tests
 
-Both sides use [Vitest](https://vitest.dev). `npm test` runs the tests once; `npm run test:watch` runs them again every time you save a file.
+The tests follow the 3 kinds of tests of Session 22, "Many small tests, few big ones":
 
-```
-cd server
-npm test
-```
+| Kind | What it tests | Files | Tools | Run it |
+| --- | --- | --- | --- | --- |
+| **Unit** (milliseconds) | one function or one component, alone | `client/src/format.test.js`, `client/src/components/StarRating.test.jsx` | [Vitest](https://vitest.dev), React Testing Library, user-event | `cd client` then `npm test` |
+| **Integration** (tens of ms) | a route with its middleware, through supertest | `server/tests/api.test.js` | Vitest, supertest | `cd server` then `npm test` |
+| **End-to-end** (seconds) | a real browser on the whole app: the built client, our API and a database | `e2e/nextup.spec.js` | [Playwright](https://playwright.dev), mongodb-memory-server | `cd e2e` then `npm test` |
 
-The back-end tests (Vitest + supertest) send requests straight to the Express app, with no port and no database. They check that:
+In `client` and `server`, `npm run test:watch` runs the tests again every time you save a file.
+
+**Unit (10 tests).** `plural` gives "0 titles", "1 title" and "4 titles". `initials` handles 2 names, extra spaces, one word, three words (only 2 letters) and an empty name. The `StarRating` component shows 5 stars with the right label, and clicking a star sends that number to the parent.
+
+**Integration (5 tests).** They send requests straight to the Express app, with no port and no database:
 - `GET /api/health` answers 200
-- `GET /api/lists` without a token answers 401
+- `GET /api/lists` and `GET /api/suggestions/movies` without a token answer 401
 - signing up with a short password answers 400
 - creating a list with an empty name answers 400, even with a valid token
 
 They don't need a `.env` file: `vitest.config.js` gives them a fake `JWT_SECRET`.
 
+**End-to-end (2 tests).** A real Chromium browser clicks through the app like a user:
+- opening `/lists` without being logged in sends you to Log in
+- the main journey: sign up, create a Books list, rename it, go back to My Lists, reload the page, log out, log in again, and the list is still there
+
+The first time, install the e2e tools (`server` and `client` need their own `npm install` too):
+
 ```
-cd client
+cd e2e
+npm install
+npx playwright install chromium
 npm test
 ```
 
-The front-end tests (Vitest + React Testing Library + user-event) render the `StarRating` component. They check that it shows 5 stars with the right label, and that clicking a star sends that number to the parent.
+`npm test` starts everything by itself and stops it at the end:
+- **the API on port 3001** (`start-api.js`), with an in-memory MongoDB. It never touches the real database and needs no `.env`.
+- **the built client on port 4173** (`npm run build` then `npm run preview`).
+
+The search and the suggestions aren't tested here, because they depend on Open Library and TMDB. The first `npm install` downloads MongoDB once (about 800 MB on Windows).
 
 ## Security
 
