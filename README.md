@@ -42,6 +42,10 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 
 ## Architecture
 
+The 3 parts and how they talk (React in the browser, the Express API, MongoDB Atlas), plus Open Library and TMDB:
+
+![Architecture: React, Express and MongoDB Atlas](docs/architecture.png)
+
 ```
  Browser: React app (client/)                 Express API (server/)                    MongoDB Atlas
  ┌──────────────────────────┐   fetch + JWT   ┌───────────────────────────┐  Mongoose  ┌──────────────┐
@@ -79,6 +83,10 @@ The 6 screens and how users move between them (low-fi):
 ![Wireframes of the 6 screens](docs/wireframes.png)
 
 ### Database schema
+
+The 3 collections and their references (`userId`, `listId`):
+
+![Database: users, lists and items](docs/database.png)
 
 A user has many lists, and a list has many items. The list's category decides which API the search uses.
 
@@ -147,7 +155,7 @@ All routes except `/api/auth/*` and `/api/health` need the header `Authorization
 nextup/
 ├── SECURITY.md                security audit: 7 attacks, before and after the fixes
 ├── PERFORMANCE.md             Lighthouse scores and bundle sizes, before and after
-├── docs/                      wireframes
+├── docs/                      wireframes and diagrams
 ├── client/                    React app (Vite), runs on http://localhost:5173
 │   ├── .env.example           what goes in .env.development
 │   └── src/
@@ -177,6 +185,16 @@ nextup/
     ├── auth/token.js          signs and verifies the JWT
     └── tests/api.test.js      integration tests (Vitest + supertest)
 ```
+
+## Deployment
+
+Netlify hosts the React app, Render runs the API (its secrets are in Render's Environment settings), and Atlas keeps the data:
+
+![Deployment: Netlify, Render and Atlas](docs/deployment.png)
+
+GitHub Actions runs the tests at every push (`.github/workflows/ci.yml`), and Render deploys only after they pass ("After CI Checks Pass"):
+
+![CI: GitHub Actions, then Render deploys](docs/ci.png)
 
 ## Run it on your computer
 
@@ -266,6 +284,14 @@ npm test
 The search and the suggestions aren't tested here, because they depend on Open Library and TMDB. The first `npm install` downloads MongoDB once (about 800 MB on Windows).
 
 ## Security
+
+How sign up and log in work (bcrypt + JWT):
+
+![Sign up and log in with bcrypt and JWT](docs/auth.png)
+
+Every private request goes through `requireAuth`, and every query filters by `userId`: another user gets a 404.
+
+![A private request through requireAuth](docs/private-request.png)
 
 - Passwords are hashed with bcrypt (cost 12). The hash never leaves the server.
 - Login answers the same message ("Invalid email or password") whether the email or the password is wrong.
