@@ -2,7 +2,11 @@
 
 **Everything you want to read or watch next, in your own lists.**
 
-Friends recommend books and movies, we see them on social media or in class, and then we forget them. NextUp is one simple place for both: you make your own lists (like "Summer reads" or "Horror movies"), search real book and movie databases to add titles, and track each title with a status and a rating out of 5.
+As students, we get recommendations all the time: a professor mentions a book in class, a friend recommends a movie, a post shows up on social media. They end up scattered across screenshots, notes apps and group chats, without the author or the year, without knowing which ones we already finished, and without what we thought of them.
+
+NextUp puts them in one place. You search real catalogues (Open Library for books, TMDB for movies) instead of typing titles by hand, sort them into your own lists (like "Recommended in class" or "Summer reads"), and follow each title with a status, a rating out of 5 and your own notes. Your lists are private and follow you on any device.
+
+Under the hood, NextUp is a full-stack MERN app: an Express API with JWT authentication where every query is scoped to its owner, two different external APIs turned into one common format (with the TMDB key kept on the server), and a React front end, deployed on Netlify, Render and MongoDB Atlas, with tests running in CI at every push.
 
 Capstone project for the Web Development course (USJ, semester 7), by **Kristy Sawan** and **Lynn Hachem**.
 
