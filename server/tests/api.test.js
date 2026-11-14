@@ -36,6 +36,15 @@ describe('NextUp API', () => {
     expect(res.body).toEqual({ error: 'Password must be at least 8 characters' });
   });
 
+  it('rejects a note longer than 1000 characters', async () => {
+    const res = await request(app)
+      .patch('/api/items/64b7f0c2a1b2c3d4e5f60718') // a valid id: zod says no before any database call
+      .set('Authorization', `Bearer ${token}`)
+      .send({ notes: 'a'.repeat(1001) });
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'notes must be 1000 characters or less' });
+  });
+
   it('rejects an empty list name, even with a valid token', async () => {
     const res = await request(app)
       .post('/api/lists')

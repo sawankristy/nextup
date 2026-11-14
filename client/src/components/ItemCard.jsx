@@ -1,4 +1,5 @@
 import Cover from './Cover.jsx';
+import ItemNotes from './ItemNotes.jsx';
 import StarRating from './StarRating.jsx';
 import { STATUS_LABELS } from '../labels.js';
 
@@ -27,6 +28,8 @@ export default function ItemCard({ item, category, onChange, onRemove }) {
           </select>
           <StarRating rating={item.rating} onRate={rating => onChange(item._id, { rating })} />
         </div>
+        {/* ?? '' because the titles saved before notes existed have no notes field */}
+        <ItemNotes notes={item.notes ?? ''} title={item.title} onSave={notes => onChange(item._id, { notes })} />
       </div>
       <button className="icon-button" aria-label={`Remove ${item.title}`} onClick={() => onRemove(item._id)}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

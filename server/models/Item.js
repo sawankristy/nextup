@@ -13,6 +13,7 @@ const itemSchema = new mongoose.Schema(
     imageUrl: { type: String, default: '' }, // the cover (book) or the poster (movie)
     status: { type: String, enum: ['to do', 'in progress', 'done'], default: 'to do' },
     rating: { type: Number, min: 1, max: 5, default: null }, // null = not rated yet
+    notes: { type: String, trim: true, maxlength: 1000, default: '' }, // the user's own note on this title, '' = no note
   },
   { timestamps: true }
 );

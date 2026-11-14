@@ -22,6 +22,7 @@ The API runs on Render's free plan: after 15 minutes without visitors it goes to
 - **Filter the search results**: by year (before 1980, 1980–1999, 2000–2014, 2015 and after), only titles with a cover, or hide the titles already in the list. "Showing 8 of 20" says when a filter hides something, and the filters stay when you search again.
 - **Suggestions**: under your lists, My Lists suggests this week's trending books (Open Library) and popular movies (TMDB), in two tabs: Books · Movies. Choose one of your lists in "Add to:", then add a title with "+ Add". Its list card updates right away.
 - **Track each title**: change its status (to read / reading / done, or to watch / watching / done), rate it from 1 to 5 stars, or remove it.
+- **Notes on each title**: write a short note on any title (for example what you thought of a book you finished), up to 1000 characters. It's saved with the title, so it's still there after a refresh, a log out, or on another computer.
 - **Filter by status**: pills above the titles (All · To read · Reading · Done, or All · To watch · Watching · Done) show how many titles each status has. Click one to see only those titles.
 - **Fast pages**: when you go back to a page you already opened, its data shows at once from a small cache, and the app refreshes it in the background. The first time a page loads, grey skeleton blocks show where the content will appear.
 - **Private**: the My Lists page and the list pages are only for logged-in users, and each user only ever sees their own lists.
@@ -111,6 +112,7 @@ erDiagram
     string imageUrl "cover or poster"
     string status "to do, in progress, done"
     number rating "1 to 5, or null"
+    string notes "max 1000, empty = no note"
     date createdAt
   }
 ```
@@ -132,7 +134,7 @@ All routes except `/api/auth/*` and `/api/health` need the header `Authorization
 | DELETE | `/api/lists/:id` | delete a list and its titles | 204 | 400, 401, 404 |
 | GET | `/api/lists/:id/items` | the titles in a list | 200 | 400, 401, 404 |
 | POST | `/api/lists/:id/items` | add a title `{ externalId, title, author, year, imageUrl }` | 201 | 400, 401, 404, 409 |
-| PATCH | `/api/items/:id` | change `{ status }` and/or `{ rating }` | 200 | 400, 401, 404 |
+| PATCH | `/api/items/:id` | change `{ status }`, `{ rating }` and/or `{ notes }` | 200 | 400, 401, 404 |
 | DELETE | `/api/items/:id` | remove a title | 204 | 400, 401, 404 |
 | GET | `/api/search/movies?q=` | search TMDB (through our server) | 200 | 400, 401, 500 |
 | GET | `/api/suggestions/books` | this week's trending books (Open Library), kept 1 hour on the server | 200 | 401, 500 |
@@ -223,20 +225,21 @@ Open http://localhost:5173 and create an account.
 
 The tests follow the 3 kinds of tests of Session 22, "Many small tests, few big ones":
 
-| Kind | What it tests | Files | Tools | Run it |
-| --- | --- | --- | --- | --- |
-| **Unit** (milliseconds) | one function or one component, alone | `client/src/format.test.js`, `client/src/components/StarRating.test.jsx` | [Vitest](https://vitest.dev), React Testing Library, user-event | `cd client` then `npm test` |
-| **Integration** (tens of ms) | a route with its middleware, through supertest | `server/tests/api.test.js` | Vitest, supertest | `cd server` then `npm test` |
-| **End-to-end** (seconds) | a real browser on the whole app: the built client, our API and a database | `e2e/nextup.spec.js` | [Playwright](https://playwright.dev), mongodb-memory-server | `cd e2e` then `npm test` |
+| Kind | Tests | What it tests | Files | Tools | Run it |
+| --- | --- | --- | --- | --- | --- |
+| **Unit** (milliseconds) | 12 | one function or one component, alone | `client/src/format.test.js`, `client/src/components/StarRating.test.jsx`, `client/src/components/ItemNotes.test.jsx` | [Vitest](https://vitest.dev), React Testing Library, user-event | `cd client` then `npm test` |
+| **Integration** (tens of ms) | 6 | a route with its middleware, through supertest | `server/tests/api.test.js` | Vitest, supertest | `cd server` then `npm test` |
+| **End-to-end** (seconds) | 2 | a real browser on the whole app: the built client, our API and a database | `e2e/nextup.spec.js` | [Playwright](https://playwright.dev), mongodb-memory-server | `cd e2e` then `npm test` |
 
 In `client` and `server`, `npm run test:watch` runs the tests again every time you save a file.
 
-**Unit (10 tests).** `plural` gives "0 titles", "1 title" and "4 titles". `initials` handles 2 names, extra spaces, one word, three words (only 2 letters) and an empty name. The `StarRating` component shows 5 stars with the right label, and clicking a star sends that number to the parent.
+**Unit (12 tests).** `plural` gives "0 titles", "1 title" and "4 titles". `initials` handles 2 names, extra spaces, one word, three words (only 2 letters) and an empty name. The `StarRating` component shows 5 stars with the right label, and clicking a star sends that number to the parent. The `ItemNotes` component saves a new note without its extra spaces, and Cancel saves nothing and keeps the old note.
 
-**Integration (5 tests).** They send requests straight to the Express app, with no port and no database:
+**Integration (6 tests).** They send requests straight to the Express app, with no port and no database:
 - `GET /api/health` answers 200
 - `GET /api/lists` and `GET /api/suggestions/movies` without a token answer 401
 - signing up with a short password answers 400
+- a note longer than 1000 characters answers 400 (`notes must be 1000 characters or less`)
 - creating a list with an empty name answers 400, even with a valid token
 
 They don't need a `.env` file: `vitest.config.js` gives them a fake `JWT_SECRET`.

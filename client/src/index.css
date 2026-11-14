@@ -226,7 +226,8 @@ select {
 }
 
 .field input:focus,
-.rename-form input:focus {
+.rename-form input:focus,
+.notes-form textarea:focus {
   outline: none;
   border-color: var(--brand);
   box-shadow: 0 0 0 3px var(--brand-soft);
@@ -878,6 +879,52 @@ select {
 /* "Showing 8 of 20" is just above the results */
 .result-count + .result-list {
   margin-top: var(--sp-2);
+}
+
+/* ---------- notes on a title ---------- */
+/* the saved note: a soft pink box, with my line breaks kept */
+.item-notes {
+  margin: var(--sp-1) 0 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 0.875rem;
+  white-space: pre-wrap; /* keeps the line breaks i typed */
+  overflow-wrap: anywhere; /* a very long word wraps instead of overflowing on a phone */
+}
+
+/* the textarea looks like the other inputs (same border, radius and focus ring) */
+.notes-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.notes-form textarea {
+  display: block;
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1.5px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem; /* 16px, so a phone doesn't zoom in */
+  resize: vertical;
+}
+
+/* the counter on the left, Cancel and Save on the right
+   (on a small phone the 2 buttons go under the counter, together) */
+.notes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.notes-actions .form-actions {
+  margin-left: auto;
 }
 
 /* ---------- skeleton loading ---------- */

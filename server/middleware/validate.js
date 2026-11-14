@@ -88,9 +88,10 @@ export const NewItemInput = z.object({
     .optional(),
 });
 
-// PATCH: both are optional, but the ones that are sent must be correct
+// PATCH: all 3 are optional, but the ones that are sent must be correct
 const STATUS_ERROR = "status must be 'to do', 'in progress' or 'done'";
 const RATING_ERROR = 'rating must be a whole number from 1 to 5';
+const NOTES_ERROR = 'notes must be 1000 characters or less';
 
 export const ItemUpdateInput = z.object({
   status: z.enum(['to do', 'in progress', 'done'], { error: STATUS_ERROR }).optional(),
@@ -99,4 +100,8 @@ export const ItemUpdateInput = z.object({
     .min(1, RATING_ERROR)
     .max(5, RATING_ERROR)
     .optional(),
-}).refine(body => body.status !== undefined || body.rating !== undefined, 'Send a status or a rating');
+  notes: z.string({ error: NOTES_ERROR }).trim().max(1000, NOTES_ERROR).optional(), // '' is fine: it deletes the note
+}).refine(
+  body => body.status !== undefined || body.rating !== undefined || body.notes !== undefined,
+  'Send a status, a rating or notes'
+);

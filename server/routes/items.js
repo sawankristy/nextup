@@ -5,13 +5,14 @@ import { validateId, validate, ItemUpdateInput } from '../middleware/validate.js
 // every route here runs after requireAuth, so req.userId is always set
 const itemsRouter = express.Router();
 
-// UPDATE --> PATCH /api/items/:id  (status and/or rating)
+// UPDATE --> PATCH /api/items/:id  (status, rating and/or notes)
 itemsRouter.patch('/:id', validateId, validate(ItemUpdateInput), async (req, res) => {
-  const { status, rating } = req.body;
+  const { status, rating, notes } = req.body;
   // only the fields that were sent, so changing the rating doesn't erase the status
   const changes = {};
   if (status !== undefined) changes.status = status;
   if (rating !== undefined) changes.rating = rating;
+  if (notes !== undefined) changes.notes = notes;
   try {
     const item = await Item.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
