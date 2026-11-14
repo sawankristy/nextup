@@ -208,7 +208,7 @@ Start it:
 npm run dev
 ```
 
-The terminal shows `connected to MongoDB` and `API listening on http://localhost:3000`. If a variable is missing, the server stops right away with `Missing env var: …` and the name of the missing one.
+The terminal shows `connected to MongoDB` and `API listening on port 3000`. If a variable is missing, the server stops right away with `Missing env var: …` and the name of the missing one.
 
 ### 2. The React app (second terminal)
 
@@ -230,6 +230,8 @@ The tests follow the 3 kinds of tests of Session 22, "Many small tests, few big 
 | **Unit** (milliseconds) | 12 | one function or one component, alone | `client/src/format.test.js`, `client/src/components/StarRating.test.jsx`, `client/src/components/ItemNotes.test.jsx` | [Vitest](https://vitest.dev), React Testing Library, user-event | `cd client` then `npm test` |
 | **Integration** (tens of ms) | 6 | a route with its middleware, through supertest | `server/tests/api.test.js` | Vitest, supertest | `cd server` then `npm test` |
 | **End-to-end** (seconds) | 2 | a real browser on the whole app: the built client, our API and a database | `e2e/nextup.spec.js` | [Playwright](https://playwright.dev), mongodb-memory-server | `cd e2e` then `npm test` |
+
+GitHub Actions runs the unit and integration tests on every push (`.github/workflows/ci.yml`).
 
 In `client` and `server`, `npm run test:watch` runs the tests again every time you save a file.
 

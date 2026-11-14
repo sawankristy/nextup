@@ -17,7 +17,7 @@ const port = Number(process.env.PORT) || 3000;
 try {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log('connected to MongoDB');
-  app.listen(port, () => console.log(`API listening on http://localhost:${port}`));
+  app.listen(port, () => console.log(`API listening on port ${port}`)); // only the port: on Render the address isn't my computer
 } catch (err) {
   console.error('DB connection failed:', err.message);
   process.exit(1);
